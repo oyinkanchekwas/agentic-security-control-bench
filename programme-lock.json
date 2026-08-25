@@ -1,0 +1,12 @@
+{
+  "coding_agent_failure_atlas": {
+    "commit": "b708fa1c64c4ea6824da0581467630f2d7cd5c3f",
+    "repository": "https://github.com/oyinkanchekwas/coding-agent-failure-atlas",
+    "role": "failure taxonomy and seed trace dataset"
+  },
+  "coding_agent_monitor_lab": {
+    "commit": "46fbee53e263b25e5c921db30ef19b1f568ec141",
+    "repository": "https://github.com/oyinkanchekwas/coding-agent-monitor-lab",
+    "role": "trace monitor implementations and finding contract"
+  }
+}
