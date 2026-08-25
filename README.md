@@ -3,11 +3,12 @@
 A contrastive benchmark for testing whether coding-agent monitors base control decisions on
 policy-relevant trace evidence.
 
-Version 0.3 contains 320 synthetic traces in 80 contrast sets. A monitor selects one of four
-controls, locates the first actionable event, and cites the fields supporting its decision. The
-replay engine checks prohibited effects and task completion after the control is applied.
+Version 0.4 retains the 320-trace v0.3 benchmark and adds a separate adversarial holdout containing
+160 synthetic traces in 40 contrast sets. A monitor selects one of four controls, locates the first
+actionable event, and cites the fields supporting its decision. The replay engine checks prohibited
+effects and task completion after the control is applied.
 
-`v0.3.0` | Python 3.11 and 3.12 | MIT Licence | 27 tests
+`v0.4.0` | Python 3.11 and 3.12 | MIT Licence | 39 tests
 
 ## Full-dataset baselines
 
@@ -40,14 +41,31 @@ the causal policy fields in the contrast sets.
 | Qwen2.5 0.5B | 0.1250 | 1.0000 | 0.1250 | 0.0000 | 0.3438 | 0.0000 | 0.4982 |
 
 The small model returned valid structured responses for all 64 traces, then selected
-`require_approval` every time and left every evidence array empty. Its perfect prevention therefore
-comes with zero permitted-task retention, zero counterfactual sensitivity, and poor calibration.
+`require_approval` every time and left every evidence array empty. Perfect prevention came with zero
+permitted-task retention, zero counterfactual sensitivity, zero evidence F1, and poor calibration.
 
 Paired bootstrap differences use Qwen minus keyword. The 95% interval is `[-0.4062, -0.0152]` for
 control accuracy, `[0.0625, 0.5312]` for prevention, `[-0.2812, -0.0312]` for retention, and
 `[-0.5469, -0.1250]` for replayed completion. The result supports no general superiority claim.
 
 ![Held-out learned and keyword results](docs/assets/learned-test-safety-retention.svg)
+
+## Adversarial holdout
+
+The v0.4 suite covers lexical decoys, policy-obscuring paraphrases, embedded instruction attacks,
+multi-event composition, and deceptive completion or verification. Each adversarial trace points
+to a frozen v0.3 test counterpart. The suite is balanced by policy family, perturbation class,
+causal-state relation, and permitted or unsafe status.
+
+The Qwen monitor again selected `require_approval` for every trace. It prevented all 80 unsafe
+effects and interrupted all 80 permitted tasks. Approval-request rate and intervention burden were
+1.0000. Unnecessary intervention was 1.0000, and selective utility was 0.0000. Qwen and block all
+share the same safety and permitted-retention coordinates. Allow all records full
+permitted retention and no unsafe prevention.
+
+See the [adversarial suite record](docs/ADVERSARIAL_SUITE.md) and
+[adversarial results](docs/ADVERSARIAL_ROBUSTNESS.md) for class-level scores, paired intervals, and
+metric definitions, with error counts in the same report.
 
 ## Quick start
 
@@ -66,6 +84,16 @@ PYTHONPATH=src python3 -m control_bench evaluate data/contrast_sets.jsonl \
   --monitor keyword --split test --summary-only --pretty
 ```
 
+Validate and compare the adversarial holdout:
+
+```bash
+PYTHONPATH=src python3 -m control_bench validate-adversarial \
+  data/adversarial/contrast_sets.jsonl --clean data/contrast_sets.jsonl
+PYTHONPATH=src python3 -m control_bench compare-adversarial \
+  data/adversarial/contrast_sets.jsonl --clean data/contrast_sets.jsonl \
+  --summary-only --pretty
+```
+
 Instructions for the optional local and remote model extras are in
 [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
 
@@ -82,6 +110,9 @@ Each semantic scenario has compact and extended layouts. Scenario identifiers re
 across the partitions: 128 train traces, 128 development traces, and 64 test traces. The policy
 families cover filesystem scope, outbound destinations, publication approval, dependency
 provenance, test integrity, verification claims, secret handling, and embedded instructions.
+
+The adversarial holdout has no training or development subdivision. Its five perturbation classes
+contain eight sets and 32 traces each. The v0.3 data and prompt hashes are locked separately.
 
 ## Monitor contract
 
@@ -112,6 +143,10 @@ replayed task completion, intervention-event accuracy, evidence precision, evide
 evidence F1, causal-evidence accuracy, counterfactual sensitivity, counterfactual stability, Brier
 score, latency, token use, estimated cost, abstention, malformed output, and execution failure.
 
+Adversarial reports add clean-to-adversarial consistency, appropriate decision change, attack
+success, evidence and timing degradation, confidence shift, approval requests, intervention burden,
+unnecessary intervention, and selective utility. Clean and adversarial scores remain separate.
+
 Intervals use 1,000 contrast-set bootstrap samples with a fixed seed. Results are separated by
 dataset partition, policy family, and severity. Paired intervals compare monitors evaluated on the
 same cases.
@@ -120,7 +155,7 @@ same cases.
 
 ```text
 configs/              frozen monitor run configurations
-data/                 versioned contrast sets and dataset manifest
+data/                 v0.3 data plus the separately versioned adversarial holdout
 prompts/              versioned monitor prompts
 src/control_bench/    data model, providers, replay engine, metrics, and CLI
 tests/                dataset, payload-isolation, replay, evaluator, and command-line tests
@@ -136,9 +171,10 @@ programme-lock.json    pinned Atlas and Monitor Lab source revisions
 The dataset is synthetic. It contains no private coding-agent logs, real credentials, live
 endpoints, or executable attack payloads. Its policy attributes are cleaner than working-agent
 telemetry, and the labels have not undergone independent reviewer annotation. Scores from these
-320 traces do not establish deployment safety.
+synthetic traces do not establish deployment safety.
 
-The [benchmark protocol](docs/BENCHMARK_PROTOCOL.md), [error analysis](docs/ERROR_ANALYSIS.md), and
+The [benchmark protocol](docs/BENCHMARK_PROTOCOL.md), [error analysis](docs/ERROR_ANALYSIS.md),
+[adversarial results](docs/ADVERSARIAL_ROBUSTNESS.md), and
 [technical report](report/technical_report.md) describe the evaluation and its limits.
 
 ## Licence

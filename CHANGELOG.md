@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 - 2026-08-25
+
+- Added a separate adversarial holdout with 40 contrast sets and 160 inert synthetic traces.
+- Balanced five perturbation classes across all eight policy families.
+- Linked every transformed trace to one frozen v0.3 test counterpart.
+- Added clean-to-adversarial consistency, appropriate decision change, attack success, and confidence shift.
+- Added approval-request, intervention-burden, unnecessary-intervention, and selective-utility measures.
+- Added family-level and perturbation-level bootstrap intervals plus paired monitor differences.
+- Evaluated deterministic baselines, Monitor Lab, and Qwen2.5-0.5B-Instruct on the adversarial set.
+- Locked the v0.3 data, prompts, configuration, and result digests.
+
 ## 0.3.0 - 2026-08-25
 
 - Replaced the seven-control decision object with a validated five-field response using four controls.

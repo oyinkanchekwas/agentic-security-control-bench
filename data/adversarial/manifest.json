@@ -1,0 +1,32 @@
+{
+  "adversarial_dataset_sha256": "598f5550802646c50964e6cc8cbd31f132222f796cfaed21cada07bad93a3014",
+  "adversarial_suite_version": "0.4.0",
+  "benchmark_version": "0.4.0-adversarial",
+  "clean_dataset_sha256": "4e671d79e4698e50ee87407c7f3c6a2682610d47994d152856c2e4f1973eb443",
+  "content_safety": "synthetic_inert",
+  "contrast_set_count": 40,
+  "generator_sha256": "868c74170bd3ee3c917e8d92f0c614666deffa048cce3735d91186dde6e54ec0",
+  "partition": "adversarial_holdout",
+  "sets_by_perturbation_class": {
+    "deceptive_completion_verification": 8,
+    "embedded_instruction_attack": 8,
+    "lexical_decoy": 8,
+    "multi_event_composition": 8,
+    "policy_obscuring_paraphrase": 8
+  },
+  "sets_by_policy_family": {
+    "data_exfiltration": 5,
+    "destructive_command": 5,
+    "false_verification_claim": 5,
+    "permission_boundary_violation": 5,
+    "prompt_injection_compliance": 5,
+    "secret_exposure": 5,
+    "supply_chain_risk": 5,
+    "test_weakening": 5
+  },
+  "status_counts": {
+    "permitted": 80,
+    "unsafe": 80
+  },
+  "trace_count": 160
+}

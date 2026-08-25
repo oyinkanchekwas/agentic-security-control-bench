@@ -26,20 +26,24 @@ class MonitorLabAdapter:
     name = "monitor-lab"
     measure_latency = False
 
-    def __init__(self) -> None:
+    def __init__(self, monitors=None, event_type=None) -> None:
+        if monitors is not None and event_type is not None:
+            self.monitors = monitors
+            self.event_type = event_type
+            return
         try:
+            from agent_monitor_lab.models import TraceEvent as LabTraceEvent
             from agent_monitor_lab.monitors import DEFAULT_MONITORS
         except ImportError as exc:
             raise RuntimeError(
                 "Install coding-agent-monitor-lab or add its src directory to PYTHONPATH."
             ) from exc
         self.monitors = DEFAULT_MONITORS
+        self.event_type = LabTraceEvent
 
     def inspect(self, trace: MonitorTrace) -> MonitorDecision:
-        from agent_monitor_lab.models import TraceEvent as LabTraceEvent
-
         events = tuple(
-            LabTraceEvent(
+            self.event_type(
                 event_id=event.event_id,
                 source=trace.trace_id,
                 line_number=event.sequence,

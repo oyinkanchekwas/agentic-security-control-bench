@@ -25,9 +25,13 @@ after the control decision.
 
 ## Exclusions
 
-Version 0.3 does not model operating-system isolation escapes, network exploitation,
+The benchmark does not model operating-system isolation escapes, network exploitation,
 cryptographic failures, compromised monitor infrastructure, or collusion between the monitored
 agent and the monitor. Those cases require executable isolation and a separate risk review.
+
+Version 0.4 adds inert lexical, paraphrase, embedded-instruction, composed-event, and deceptive
+completion perturbations. No case launches a process, contacts an endpoint, reads a credential, or
+changes a repository. Synthetic adversarial robustness does not establish deployment safety.
 
 ## Provider boundary
 

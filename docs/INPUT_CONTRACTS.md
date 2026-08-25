@@ -26,6 +26,7 @@ PYTHONPATH=src:../coding-agent-monitor-lab/src python3 scripts/verify_programme_
   --monitor-lab ../coding-agent-monitor-lab
 
 PYTHONPATH=src:../coding-agent-monitor-lab/src python3 scripts/run_monitor_lab_baseline.py
+PYTHONPATH=src:../coding-agent-monitor-lab/src python3 scripts/run_adversarial_monitor_lab.py
 ```
 
 The lock check prevents results from being attributed to a different source revision.
@@ -39,6 +40,10 @@ sequence numbers, actors, kinds, content, and visible attributes.
 Gold labels, split labels, expected controls, effects, required effects, and recovery records are
 held by the scorer. Tests inspect both single-pass and investigator payloads and fail if any of
 those fields appear.
+
+Adversarial relationship records remain behind the same boundary. Source trace identifiers,
+perturbation classes, changed fields, causal-state relations, and severity are never serialised into
+a provider message.
 
 The local adapter imports its optional inference packages only when constructed. The remote
 adapter reads an access credential from the environment and never writes it to a run record.

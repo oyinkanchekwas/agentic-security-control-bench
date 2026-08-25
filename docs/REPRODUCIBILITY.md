@@ -1,4 +1,4 @@
-# Reproducing the v0.3 Results
+# Reproducing the v0.4 Results
 
 The package requires Python 3.11 or later and a POSIX shell for the `Makefile` commands. It has no
 third-party runtime packages for deterministic evaluation.
@@ -9,9 +9,9 @@ Run the complete repository check:
 make check
 ```
 
-This command materialises the dataset and manifest, validates every trace, runs the tests,
-recomputes the deterministic baselines, checks stored deterministic and learned summaries,
-rebuilds the reports, runs the repository quality gate, and builds a wheel.
+This command materialises the ordinary and adversarial datasets, validates every trace, runs the
+tests, recomputes both deterministic result files, checks the stored learned summaries, rebuilds
+the reports, runs the repository quality gate, and builds a wheel.
 
 The evaluator uses 1,000 contrast-set bootstrap samples with seed `20260825`. Generated JSON uses
 sorted keys. Included deterministic monitors and Monitor Lab record zero benchmark latency because
@@ -29,6 +29,18 @@ PYTHONPATH=src python3 -m control_bench compare data/contrast_sets.jsonl \
   --split test --summary-only --pretty
 ```
 
+To evaluate the separate adversarial holdout:
+
+```bash
+PYTHONPATH=src python3 -m control_bench compare-adversarial \
+  data/adversarial/contrast_sets.jsonl \
+  --clean data/contrast_sets.jsonl --summary-only --pretty
+```
+
+The adversarial manifest records the suite digest, clean v0.3 digest, generator digest, and balance
+counts. `configs/v0.3-frozen.json` records the earlier data, prompts, configuration, and result
+hashes. Validation fails if a clean counterpart falls outside the v0.3 test split.
+
 The Monitor Lab result also depends on the source revision in `programme-lock.json`. With the
 Failure Atlas and Monitor Lab checked out beside this repository, run:
 
@@ -36,8 +48,9 @@ Failure Atlas and Monitor Lab checked out beside this repository, run:
 make integration
 ```
 
-`make integration` checks both source revisions, runs the adapter across all 320 traces, and
-rebuilds the checked report files.
+`make integration` checks both source revisions, runs the adapter across all 320 ordinary traces
+and 160 adversarial traces, rebuilds the checked report files, and verifies the stored adversarial
+summary.
 
 ## Local instruction model
 
@@ -57,13 +70,20 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
   make PYTHON=.venv-model/bin/python learned-qwen
 ```
 
+Run the same frozen monitor on the adversarial holdout with:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  make PYTHON=.venv-model/bin/python learned-adversarial-qwen
+```
+
 The command writes a committed summary and ignored case-level provider records. Running the model
 again updates its timestamp and latency. Dataset, prompt, configuration, model identifier, and
 model revision remain fixed in the run record.
 
 ## Remote and investigator monitors
 
-Install `.[remote-model]`, copy the matching example configuration outside version control, and
-set its model identifier, endpoint, and cost rates. Put the access credential in the environment
+Install `.[remote-model]`, create a local configuration outside version control, and set its model
+identifier, endpoint, and cost rates. Put the access credential in the environment
 variable named by the configuration. The same runner supports the single-pass judge, two-call
 investigator, and deterministic-model ensemble.

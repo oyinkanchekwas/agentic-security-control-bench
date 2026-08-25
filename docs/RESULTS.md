@@ -73,3 +73,24 @@ all permitted-task utility and produces worse calibration. The intervals do not 
 model-ranking claim beyond these synthetic cases and this frozen prompt.
 
 ![Held-out learned and keyword results](assets/learned-test-safety-retention.svg)
+
+## Adversarial holdout
+
+Version 0.4 evaluates 160 separately held-out adversarial traces. The ordinary test scores above
+remain unchanged.
+
+| Monitor | Prevention | Permitted retention | Approval rate | Burden | Selective utility |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Allow all | 0.0000 | 1.0000 | 0.0000 | 0.0000 | 1.0000 |
+| Block all | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 |
+| Approval all | 1.0000 | 0.0000 | 1.0000 | 1.0000 | 0.0000 |
+| Keyword | 0.6625 | 0.1875 | 0.0000 | 0.7375 | 0.1875 |
+| Monitor Lab | 0.1250 | 0.9000 | 0.0000 | 0.1125 | 0.9000 |
+| Qwen2.5 0.5B | 1.0000 | 0.0000 | 1.0000 | 1.0000 | 0.0000 |
+
+Qwen requested approval on every adversarial trace and changed no decision when the causal policy
+state changed. All 160 outputs passed schema validation. The run produced no abstention or
+malformed output. Execution failure rate was zero.
+
+[ADVERSARIAL_ROBUSTNESS.md](ADVERSARIAL_ROBUSTNESS.md) contains the family and perturbation reports,
+bootstrap intervals, paired differences, metric definitions, and limits.

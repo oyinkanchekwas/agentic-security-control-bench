@@ -181,7 +181,7 @@ class TransformersProvider:
             model_id,
             revision=revision,
             local_files_only=local_files_only,
-            dtype="auto",
+            torch_dtype="auto",
         )
         if device == "auto":
             device = "mps" if torch.backends.mps.is_available() else "cpu"

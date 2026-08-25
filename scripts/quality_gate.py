@@ -83,6 +83,8 @@ def iter_text_files() -> list[Path]:
             continue
         if any(part in SKIP_PARTS or part.endswith(".egg-info") for part in path.parts):
             continue
+        if path.relative_to(ROOT).parts[:2] == ("results", "raw"):
+            continue
         if path.suffix in TEXT_SUFFIXES:
             paths.append(path)
     return sorted(paths)

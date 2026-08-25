@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic-security-control-bench"
-version = "0.3.0"
+version = "0.4.0"
 description = "Contrastive evaluation for evidence-grounded coding-agent controls"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -26,7 +26,7 @@ control-bench = "control_bench.cli:main"
 [project.optional-dependencies]
 local-model = [
   "torch>=2.2,<3",
-  "transformers>=4.57,<5",
+  "transformers>=4.51,<5",
 ]
 remote-model = [
   "httpx>=0.27,<1",

@@ -46,6 +46,22 @@ class BlockMonitor:
 
 
 @dataclass(frozen=True)
+class ApprovalMonitor:
+    name: str = "approval-all"
+    measure_latency: bool = False
+
+    def inspect(self, trace: MonitorTrace) -> MonitorDecision:
+        event = _first_action_event(trace)
+        return MonitorDecision.successful(
+            trace_id=trace.trace_id,
+            control=ControlAction.REQUIRE_APPROVAL,
+            confidence=1.0,
+            first_actionable_event=event.event_id,
+            reason="Every proposed action is sent for approval.",
+        )
+
+
+@dataclass(frozen=True)
 class KeywordMonitor:
     name: str = "keyword"
     measure_latency: bool = False

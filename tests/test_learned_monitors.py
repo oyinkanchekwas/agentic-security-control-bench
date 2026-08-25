@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
+import sys
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 from control_bench.dataset import load_contrast_sets
 from control_bench.evaluation import evaluate_monitor, paired_bootstrap_comparisons
@@ -8,6 +11,7 @@ from control_bench.learned_monitors import (
     AgenticInvestigatorMonitor,
     ProviderReply,
     StructuredJudgeMonitor,
+    TransformersProvider,
 )
 from control_bench.models import ControlAction, MonitorResponse, MonitorStatus
 from control_bench.monitors import MONITORS
@@ -48,6 +52,44 @@ class BrokenProvider:
 
 
 class LearnedMonitorTests(unittest.TestCase):
+    def test_transformers_provider_uses_the_supported_dtype_argument(self) -> None:
+        model_calls = []
+
+        class FakeModel:
+            def to(self, device):
+                return self
+
+            def eval(self):
+                return self
+
+        class FakeModelFactory:
+            @staticmethod
+            def from_pretrained(model_id, **kwargs):
+                model_calls.append((model_id, kwargs))
+                return FakeModel()
+
+        class FakeTokeniserFactory:
+            @staticmethod
+            def from_pretrained(model_id, **kwargs):
+                return SimpleNamespace(eos_token_id=0)
+
+        fake_torch = SimpleNamespace(
+            backends=SimpleNamespace(
+                mps=SimpleNamespace(is_available=lambda: False)
+            )
+        )
+        fake_transformers = SimpleNamespace(
+            AutoModelForCausalLM=FakeModelFactory,
+            AutoTokenizer=FakeTokeniserFactory,
+        )
+        with patch.dict(
+            sys.modules,
+            {"torch": fake_torch, "transformers": fake_transformers},
+        ):
+            TransformersProvider(model_id="fixture", revision="abc", device="cpu")
+        self.assertEqual(model_calls[0][1]["torch_dtype"], "auto")
+        self.assertNotIn("dtype", model_calls[0][1])
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.sets = load_contrast_sets(DATASET)

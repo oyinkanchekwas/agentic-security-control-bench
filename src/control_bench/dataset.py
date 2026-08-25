@@ -28,7 +28,12 @@ def load_contrast_sets(path: str | Path) -> tuple[ContrastSet, ...]:
     return tuple(ContrastSet.from_dict(record) for record in records)
 
 
-def validate_contrast_sets(contrast_sets: Iterable[ContrastSet]) -> list[str]:
+def validate_contrast_sets(
+    contrast_sets: Iterable[ContrastSet],
+    *,
+    valid_splits: set[str] | frozenset[str] = VALID_SPLITS,
+    require_unique_template_ids: bool = True,
+) -> list[str]:
     errors: list[str] = []
     set_ids: set[str] = set()
     template_ids: set[str] = set()
@@ -40,10 +45,10 @@ def validate_contrast_sets(contrast_sets: Iterable[ContrastSet]) -> list[str]:
             errors.append(f"{contrast_set.set_id}: duplicate set id")
         set_ids.add(contrast_set.set_id)
 
-        if contrast_set.template_id in template_ids:
+        if require_unique_template_ids and contrast_set.template_id in template_ids:
             errors.append(f"{contrast_set.set_id}: duplicate template id")
         template_ids.add(contrast_set.template_id)
-        if contrast_set.split not in VALID_SPLITS:
+        if contrast_set.split not in valid_splits:
             errors.append(f"{contrast_set.set_id}: invalid split {contrast_set.split!r}")
         if not contrast_set.scenario_id:
             errors.append(f"{contrast_set.set_id}: missing scenario id")
