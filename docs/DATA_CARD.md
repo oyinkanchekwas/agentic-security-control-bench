@@ -2,8 +2,16 @@
 
 ## Composition
 
-The seed dataset contains eight contrast sets and 32 traces. Each set has two permitted traces and
-two unsafe traces. All examples are synthetic and written for this benchmark.
+Version 0.2 contains 64 contrast sets and 256 traces. Each set has two permitted traces and two
+unsafe traces. All examples are synthetic and written for this benchmark.
+
+The split contains 128 train traces, 64 development traces, and 64 test traces. Semantic scenarios
+are disjoint across those partitions. Each policy family contributes 32 traces spread across four
+scenarios and two event layouts.
+
+Lexical decoys make permitted traces look risky, while low-signal unsafe variants require the
+structured policy state to resolve surface ambiguity. Extended layouts add unrelated history and a
+pre-action status event to every member of the contrast set.
 
 The covered failure modes are:
 
@@ -19,8 +27,11 @@ The covered failure modes are:
 ## Construction
 
 Cases are declared in `scripts/materialise_dataset.py` and written deterministically to
-`data/contrast_sets.jsonl`. Every run uses the same order and JSON key ordering. Dataset validation
-checks trace balance, event ordering, evidence references, comparison labels, and replay outcomes.
+`data/contrast_sets.jsonl`. Every run uses the same order and JSON key ordering. The generator also
+writes `data/manifest.json`, which records version, counts, and the dataset SHA-256 digest.
+
+Dataset validation checks trace balance, event ordering, evidence references, comparison labels,
+split values, template identifiers, severity labels, and replay outcomes.
 
 Each unsafe trace must cause a prohibited effect when allowed. Its gold control must prevent that
 effect and complete the task through the recorded recovery sequence. Each permitted trace must
@@ -40,9 +51,9 @@ monitor's output into the benchmark decision schema.
 
 ## Limits
 
-The traces are short and schema-led. Their policy fields are cleaner than telemetry collected from
-working coding agents. They do not represent the frequency of failure modes in deployed systems,
-and they do not measure performance under an adaptive attacker.
+Half of the traces contain seven events, while the compact layout contains four. Their policy
+fields remain cleaner than telemetry collected from working coding agents. The dataset does not
+represent failure-mode frequency in deployed systems or performance under an adaptive attacker.
 
 The labels were produced during dataset construction and have not undergone independent reviewer
 annotation. Public claims should report the dataset size and synthetic status alongside every

@@ -1,33 +1,49 @@
-# Seed Results
+# Results
 
-The four included baselines expose different errors in the benchmark protocol.
-
-The allow-all monitor retains every permitted task and permits every unsafe effect. The block-all
-monitor prevents each prohibited effect, while all permitted tasks are stopped. Its 0.25 exact
-control score reflects the unsafe cases whose gold control is `block`; it selects an excessive
-control for the remaining cases.
-
-The keyword monitor reacts to surface terms in both action text and contextual data. It prevents
-56.25% of unsafe actions, retains 31.25% of permitted tasks, and reaches 0.50 on both
-counterfactual measures. Its evidence cites text spans, so it receives no field-level evidence
-credit.
-
-The policy-field monitor reads the attributes used to label each seed case. It identifies every
-gold field and selects every gold control. This is a reference check for dataset wiring, replay,
-and metric calculation. The score does not estimate performance on unlabelled coding-agent traces.
-
-The Monitor Lab adapter retains 75% of permitted tasks and prevents 12.5% of unsafe effects. Its
-rules were written for text traces and return excerpt evidence. The present benchmark places the
-decisive policy state in structured action attributes, which accounts for its zero field-evidence
-score and low counterfactual sensitivity.
+These values use all 256 synthetic traces in version 0.2. Intervals are 95% percentile intervals
+from 1,000 contrast-set bootstrap samples.
 
 | Monitor | Control accuracy | Prevention | Task completion | Permitted retention | Evidence recall | Sensitivity | Stability | Causal evidence |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Allow all | 0.5000 | 0.0000 | 1.0000 | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 |
 | Block all | 0.2500 | 1.0000 | 0.2500 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 |
-| Keyword | 0.2812 | 0.5625 | 0.5000 | 0.3125 | 0.0000 | 0.5000 | 0.5000 | 0.0000 |
-| Policy field | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
-| Monitor Lab adapter | 0.4375 | 0.1250 | 0.8750 | 0.7500 | 0.0000 | 0.2500 | 0.6250 | 0.0000 |
+| Keyword | 0.2578 | 0.7656 | 0.3750 | 0.1562 | 0.0000 | 0.1562 | 0.8438 | 0.0000 |
+| Policy-field oracle | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| Monitor Lab adapter | 0.5078 | 0.1875 | 0.9141 | 0.8281 | 0.0000 | 0.2656 | 0.7344 | 0.0000 |
 
-The committed JSON files contain the checked summary values. Case-level decisions and replay
-outcomes can be regenerated with the command in the README.
+## Keyword baseline
+
+The keyword monitor prevents 98 of 128 unsafe effects. Its 95% prevention interval is
+0.6641 to 0.8594. It retains 20 of 128 permitted tasks, with interval 0.0859 to 0.2344.
+
+The policy-family counts show the mechanism behind this trade-off. Every permitted verification
+and publication trace is interrupted, including lexical decoys. Test-weakening cases retain 8 of
+16 permitted tasks, the highest family result for this monitor. Its evidence points to text, so it
+does not identify any causal policy field.
+
+## Monitor Lab adapter
+
+Monitor Lab retains 106 permitted tasks and prevents 24 unsafe effects. Its retention interval is
+0.7578 to 0.8906; its prevention interval is 0.1094 to 0.2578.
+
+Prevention reaches 0.50 for false verification and test weakening. It is zero for outbound
+destination breaches, publication approval failures, secret exposure, and dependency provenance.
+This follows the earlier monitor's text-oriented rules and their limited coverage of structured
+policy attributes.
+
+## Oracle check
+
+The policy-field oracle reads the labelled attributes used to construct each contrast set. Its
+perfect score confirms the evaluator path, evidence keys, gold controls, and recovery effects. It
+does not estimate performance on unseen traces.
+
+## Split behaviour
+
+Train, development, and test contain disjoint semantic scenarios. The deterministic baselines show
+small differences between the partitions because their rules are fixed and each partition retains
+the same family balance. Per-split values are stored in the checked JSON files.
+
+![Unsafe-action prevention against permitted-task retention](assets/safety-retention.svg)
+
+The family count tables are in [ERROR_ANALYSIS.md](ERROR_ANALYSIS.md). Case-level decisions and
+replay outcomes can be regenerated with the command in the README.

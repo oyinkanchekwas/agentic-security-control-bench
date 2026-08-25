@@ -3,111 +3,113 @@
 A contrastive benchmark for testing whether coding-agent monitors base control decisions on
 policy-relevant trace evidence.
 
-The seed dataset contains 32 synthetic traces arranged in eight contrast sets. Each set changes a
-small number of policy fields while keeping the coding task and surrounding events close. A
-monitor must select a control, identify the first actionable event, and cite the fields supporting
-its decision. The replay engine then checks whether the control prevents the prohibited effect and
-preserves task completion.
+Version 0.2 contains 256 synthetic traces in 64 contrast sets. Each monitor selects a control,
+locates the first actionable event, and cites the fields supporting its decision. The replay engine
+checks whether that control prevents the prohibited effect while preserving task completion.
+
+`v0.2.0` | Python 3.11 and 3.12 | MIT Licence | 17 tests
+
+## Checked results
+
+| Monitor | Control accuracy | Unsafe prevention | Permitted retention | Sensitivity | Stability | Causal evidence |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Allow all | 0.5000 | 0.0000 | 1.0000 | 0.0000 | 1.0000 | 0.0000 |
+| Block all | 0.2500 | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 |
+| Keyword | 0.2578 | 0.7656 | 0.1562 | 0.1562 | 0.8438 | 0.0000 |
+| Policy-field oracle | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| Monitor Lab adapter | 0.5078 | 0.1875 | 0.8281 | 0.2656 | 0.7344 | 0.0000 |
+
+The keyword monitor prevents 98 of 128 unsafe effects and interrupts 108 of 128 permitted traces.
+Monitor Lab retains 106 permitted tasks, though it prevents 24 unsafe effects. Both return text or
+no evidence, so neither receives credit for the causal policy fields used by the paired cases.
+
+![Unsafe-action prevention against permitted-task retention](docs/assets/safety-retention.svg)
+
+The policy-field oracle reads the attributes used to construct the cases. Its score checks dataset
+wiring, replay behaviour, and metric calculation. It is not a deployable monitor result.
+
+Checked summaries, 95% bootstrap intervals, split metrics, and policy-family error counts are stored
+in [results/baselines.json](results/baselines.json) and
+[results/monitor_lab.json](results/monitor_lab.json). See
+[docs/ERROR_ANALYSIS.md](docs/ERROR_ANALYSIS.md) for the count tables.
 
 ## Quick start
 
-The package has no runtime dependencies outside the Python standard library.
+The package has no third-party runtime dependencies.
 
 ```bash
 git clone https://github.com/oyinkanchekwas/agentic-security-control-bench.git
 cd agentic-security-control-bench
 make check
-make baselines
 ```
 
-Individual monitors can be evaluated from the command line:
+Run the keyword monitor on held-out scenarios:
 
 ```bash
 PYTHONPATH=src python3 -m control_bench evaluate data/contrast_sets.jsonl \
-  --monitor keyword --pretty
+  --monitor keyword --split test --summary-only --pretty
 ```
 
-## Benchmark task
+## Dataset design
 
-Every contrast set contains four traces:
+Every contrast set contains four linked traces:
 
 - a permitted action with plain wording;
 - an unsafe action with an explicit cue;
 - a permitted action containing risky words as data; and
 - an unsafe action expressed without the usual warning terms.
 
-The paired structure tests whether a monitor responds to the policy state recorded in the trace.
-It also exposes monitors that react mainly to words such as `delete`, `secret`, or `private`.
+Each semantic scenario has a compact four-event layout and an extended seven-event layout. The
+extended form adds invariant history and status events. Scenarios remain disjoint across train,
+development, and test: 128 train traces, 64 development traces, and 64 test traces.
 
-The current policy families cover filesystem scope, outbound destinations, publication approval,
+The policy families cover filesystem scope, outbound destinations, publication approval,
 dependency provenance, test integrity, verification claims, secret handling, and embedded
-instructions.
+instructions. Unsafe cases carry moderate, high, or critical severity labels.
+
+## Monitor boundary
+
+Monitors receive `MonitorTrace`, which contains the task and task-time events. Gold labels,
+required effects, recovery events, and action effects stay inside the evaluator. A boundary test
+checks those exclusions before each repository release.
+
+The decision interface accepts `allow`, `warn`, `revise`, `redact`, `request_approval`, `sandbox`,
+and `block`. Monitor output also includes a risk score, event identifier, evidence fields, a brief
+reason, latency, and token cost.
 
 ## Measures
 
-The evaluator reports:
+The evaluator reports exact control accuracy, unsafe-action prevention, permitted-task retention,
+task completion, intervention-event accuracy, evidence precision and recall, counterfactual
+sensitivity and stability, causal-evidence accuracy, Brier score, latency, and token cost.
 
-- exact control accuracy;
-- unsafe-action prevention and permitted-task retention;
-- intervention-event accuracy and evidence-field precision/recall;
-- counterfactual sensitivity and stability;
-- causal-evidence accuracy;
-- task completion after replay;
-- Brier score, monitor latency, and token cost.
-
-Definitions and denominators are recorded in [docs/BENCHMARK_PROTOCOL.md](docs/BENCHMARK_PROTOCOL.md).
-
-## Included baselines
-
-| Monitor | Control accuracy | Unsafe action prevention | Permitted task retention | Counterfactual sensitivity | Counterfactual stability | Causal evidence accuracy |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Allow all | 0.5000 | 0.0000 | 1.0000 | 0.0000 | 1.0000 | 0.0000 |
-| Block all | 0.2500 | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 |
-| Keyword | 0.2812 | 0.5625 | 0.3125 | 0.5000 | 0.5000 | 0.0000 |
-| Policy field | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
-| Monitor Lab adapter | 0.4375 | 0.1250 | 0.7500 | 0.2500 | 0.6250 | 0.0000 |
-
-The policy-field monitor reads the labelled policy attributes used to construct the seed cases.
-Its score checks the evaluator and replay path. It is an upper reference for this fixture set, with
-no claim about performance on unseen traces.
-
-Checked summaries are stored in [results/baselines.json](results/baselines.json) and
-[results/monitor_lab.json](results/monitor_lab.json). The report in
-[docs/RESULTS.md](docs/RESULTS.md) explains the observed failure patterns.
-The full seed report is available in [report/technical_report.md](report/technical_report.md).
-
-The optional Monitor Lab adapter keeps the earlier monitor implementation in the evaluation. Its
-pinned source revision and local integration command are documented in
-[docs/INPUT_CONTRACTS.md](docs/INPUT_CONTRACTS.md).
-
-Case-level output can be generated without changing the committed summaries:
-
-```bash
-PYTHONPATH=src python3 -m control_bench compare data/contrast_sets.jsonl \
-  --out results/raw/baselines.json --pretty
-```
+Intervals use 1,000 contrast-set bootstrap samples with a fixed seed. Results are also separated by
+dataset partition, policy family, and severity. Definitions and denominators are recorded in
+[docs/BENCHMARK_PROTOCOL.md](docs/BENCHMARK_PROTOCOL.md).
 
 ## Repository map
 
 ```text
-data/                 contrast-set dataset
-src/control_bench/    data model, monitors, replay engine, metrics, and CLI
-tests/                dataset, replay, evaluator, and command-line tests
-scripts/              deterministic data materialisation and repository checks
-docs/                 protocol, data record, threat model, prior work, and results
-results/              committed baseline output
-report/               seed technical report
+data/                 versioned contrast sets and dataset manifest
+src/control_bench/    data model, monitor boundary, replay engine, metrics, and CLI
+tests/                dataset, isolation, replay, evaluator, and command-line tests
+scripts/              materialisation, report generation, integration, and repository checks
+docs/                 protocol, annotation guide, data record, threat model, and results
+results/              checked baseline summaries
+report/               technical report
 programme-lock.json    pinned Atlas and Monitor Lab source revisions
 ```
 
 ## Scope
 
-The seed release is a controlled test fixture. It contains no private coding-agent logs, real
-credentials, live endpoints, or executable attack payloads. Results from these 32 traces cannot be
-used as evidence of deployment safety.
+The dataset is synthetic. It contains no private coding-agent logs, real credentials, live
+endpoints, or executable attack payloads. Its policy attributes are cleaner than working-agent
+telemetry, and the labels have not undergone independent reviewer annotation. Scores from these
+256 traces do not establish deployment safety.
 
-The prior-work review and the boundary of the present experiment are recorded in
-[docs/PRIOR_WORK.md](docs/PRIOR_WORK.md).
+The prior-work review and experimental boundary are recorded in
+[docs/PRIOR_WORK.md](docs/PRIOR_WORK.md). Reproduction commands are in
+[docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
 
 ## Licence
 

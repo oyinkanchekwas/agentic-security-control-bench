@@ -1,4 +1,4 @@
-.PHONY: data validate test baselines verify-results quality integration check
+.PHONY: data validate test baselines verify-results reports quality integration check
 
 data:
 	PYTHONPATH=src python3 scripts/materialise_dataset.py
@@ -15,11 +15,15 @@ baselines:
 verify-results:
 	PYTHONPATH=src python3 scripts/verify_results.py
 
+reports:
+	PYTHONPATH=src python3 scripts/build_reports.py
+
 quality:
 	PYTHONPATH=src python3 scripts/quality_gate.py
 
 integration:
 	PYTHONPATH=src:../coding-agent-monitor-lab/src python3 scripts/verify_programme_links.py --atlas ../coding-agent-failure-atlas --monitor-lab ../coding-agent-monitor-lab
 	PYTHONPATH=src:../coding-agent-monitor-lab/src python3 scripts/run_monitor_lab_baseline.py
+	PYTHONPATH=src python3 scripts/build_reports.py
 
-check: data validate test baselines verify-results quality
+check: data validate test baselines verify-results reports quality

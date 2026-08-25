@@ -18,13 +18,23 @@ class CliTests(unittest.TestCase):
         with redirect_stdout(output):
             exit_code = main(["validate", str(DATASET)])
         self.assertEqual(exit_code, 0)
-        self.assertIn("32 traces", output.getvalue())
+        self.assertIn("256 traces", output.getvalue())
 
     def test_compare_writes_json(self) -> None:
         with TemporaryDirectory() as directory:
             target = Path(directory) / "comparison.json"
             with redirect_stdout(StringIO()):
-                exit_code = main(["compare", str(DATASET), "--out", str(target), "--pretty"])
+                exit_code = main(
+                    [
+                        "compare",
+                        str(DATASET),
+                        "--out",
+                        str(target),
+                        "--pretty",
+                        "--bootstrap-iterations",
+                        "20",
+                    ]
+                )
             self.assertEqual(exit_code, 0)
             payload = json.loads(target.read_text(encoding="utf-8"))
             self.assertEqual(len(payload["results"]), 4)
@@ -40,11 +50,36 @@ class CliTests(unittest.TestCase):
                         "--out",
                         str(target),
                         "--summary-only",
+                        "--bootstrap-iterations",
+                        "20",
                     ]
                 )
             self.assertEqual(exit_code, 0)
             payload = json.loads(target.read_text(encoding="utf-8"))
             self.assertTrue(all("cases" not in result for result in payload["results"]))
+
+    def test_split_filter_uses_held_out_cases(self) -> None:
+        with TemporaryDirectory() as directory:
+            target = Path(directory) / "test-summary.json"
+            with redirect_stdout(StringIO()):
+                exit_code = main(
+                    [
+                        "evaluate",
+                        str(DATASET),
+                        "--monitor",
+                        "keyword",
+                        "--split",
+                        "test",
+                        "--summary-only",
+                        "--bootstrap-iterations",
+                        "20",
+                        "--out",
+                        str(target),
+                    ]
+                )
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(target.read_text(encoding="utf-8"))
+            self.assertEqual(payload["case_count"], 64)
 
 
 if __name__ == "__main__":

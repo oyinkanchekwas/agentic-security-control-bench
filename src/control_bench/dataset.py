@@ -10,6 +10,8 @@ from control_bench.replay import replay_trace
 
 VALID_LABELS = {"permitted", "unsafe"}
 VALID_RELATIONS = {"same", "flip"}
+VALID_SEVERITIES = {"none", "moderate", "high", "critical"}
+VALID_SPLITS = {"train", "dev", "test"}
 
 
 def load_contrast_sets(path: str | Path) -> tuple[ContrastSet, ...]:
@@ -29,11 +31,22 @@ def load_contrast_sets(path: str | Path) -> tuple[ContrastSet, ...]:
 def validate_contrast_sets(contrast_sets: Iterable[ContrastSet]) -> list[str]:
     errors: list[str] = []
     set_ids: set[str] = set()
+    template_ids: set[str] = set()
     trace_ids: set[str] = set()
+    versions: set[str] = set()
     for contrast_set in contrast_sets:
+        versions.add(contrast_set.benchmark_version)
         if contrast_set.set_id in set_ids:
             errors.append(f"{contrast_set.set_id}: duplicate set id")
         set_ids.add(contrast_set.set_id)
+
+        if contrast_set.template_id in template_ids:
+            errors.append(f"{contrast_set.set_id}: duplicate template id")
+        template_ids.add(contrast_set.template_id)
+        if contrast_set.split not in VALID_SPLITS:
+            errors.append(f"{contrast_set.set_id}: invalid split {contrast_set.split!r}")
+        if not contrast_set.scenario_id:
+            errors.append(f"{contrast_set.set_id}: missing scenario id")
 
         if len(contrast_set.variants) != 4:
             errors.append(f"{contrast_set.set_id}: expected four variants")
@@ -66,6 +79,8 @@ def validate_contrast_sets(contrast_sets: Iterable[ContrastSet]) -> list[str]:
                 )
             if not comparison.changed_fields:
                 errors.append(f"{contrast_set.set_id}: comparison has no changed fields")
+    if len(versions) != 1:
+        errors.append("dataset contains mixed benchmark versions")
     return errors
 
 
@@ -75,6 +90,8 @@ def _validate_variant(variant: TraceVariant, trace_ids: set[str]) -> list[str]:
         errors.append(f"{variant.trace_id}: duplicate trace id")
     if variant.gold.label not in VALID_LABELS:
         errors.append(f"{variant.trace_id}: invalid label {variant.gold.label!r}")
+    if variant.gold.severity not in VALID_SEVERITIES:
+        errors.append(f"{variant.trace_id}: invalid severity {variant.gold.severity!r}")
     if not variant.events:
         errors.append(f"{variant.trace_id}: trace has no events")
         return errors
@@ -87,11 +104,15 @@ def _validate_variant(variant: TraceVariant, trace_ids: set[str]) -> list[str]:
         errors.append(f"{variant.trace_id}: duplicate event id")
 
     if variant.gold.label == "permitted":
+        if variant.gold.severity != "none":
+            errors.append(f"{variant.trace_id}: permitted trace must have severity 'none'")
         if variant.gold.control is not ControlAction.ALLOW:
             errors.append(f"{variant.trace_id}: permitted trace must use allow")
         if variant.gold.first_actionable_event is not None:
             errors.append(f"{variant.trace_id}: permitted trace has an intervention point")
     else:
+        if variant.gold.severity == "none":
+            errors.append(f"{variant.trace_id}: unsafe trace has no severity")
         if variant.gold.control is ControlAction.ALLOW:
             errors.append(f"{variant.trace_id}: unsafe trace uses allow")
         if variant.gold.first_actionable_event not in event_ids:

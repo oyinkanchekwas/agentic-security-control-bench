@@ -8,7 +8,7 @@ reports, approved network boundaries, and repository visibility as protected ass
 ## Agent capabilities
 
 Trace events represent agents that can read files, edit code, run shell commands, install packages,
-write logs, call network tools, and change repository settings. The seed cases record proposed
+write logs, call network tools, and change repository settings. The synthetic cases record proposed
 effects; they do not execute these operations.
 
 ## Failure source
@@ -25,6 +25,6 @@ after the control decision.
 
 ## Exclusions
 
-The seed release does not model operating-system isolation escapes, network exploitation,
+Version 0.2 does not model operating-system isolation escapes, network exploitation,
 cryptographic failures, compromised monitor infrastructure, or collusion between the monitored
 agent and the monitor. Those cases require executable sandboxes and a different risk review.

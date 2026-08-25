@@ -1,26 +1,39 @@
-# Reproducing the Seed Results
+# Reproducing the v0.2 Results
 
-## Environment
+The package requires Python 3.11 or later and a POSIX shell for the `Makefile` commands. It has no
+third-party runtime packages.
 
-- Python 3.11 or later;
-- no third-party runtime packages; and
-- a POSIX shell for the `Makefile` commands.
-
-## Commands
+Run the complete repository check:
 
 ```bash
-make data
-make validate
-make test
-make baselines
-make verify-results
-make quality
+make check
 ```
 
-`make data` rewrites `data/contrast_sets.jsonl` from the declarations in
-`scripts/materialise_dataset.py`. `make baselines` rewrites `results/baselines.json`.
+This command materialises the dataset and manifest, validates every trace, runs the tests,
+recomputes the deterministic baselines, checks the stored metrics, rebuilds the error report and
+figure, and runs the repository quality gate.
 
-After both commands, `git diff --exit-code` should remain empty. A changed dataset or result file
-means that the source declarations, evaluator, monitor code, or Python JSON serialisation has
-changed. The included deterministic monitors report zero latency and token use, which keeps the
-committed baseline file stable across machines.
+The evaluator uses 1,000 contrast-set bootstrap samples with seed `20260825`. The generated JSON
+uses sorted keys, and the included monitors report zero latency and token use. A clean checkout
+should therefore remain unchanged after `make check`:
+
+```bash
+git diff --exit-code
+```
+
+To evaluate the held-out test scenarios only:
+
+```bash
+PYTHONPATH=src python3 -m control_bench compare data/contrast_sets.jsonl \
+  --split test --summary-only --pretty
+```
+
+The Monitor Lab result also depends on the source revision in `programme-lock.json`. With the
+Failure Atlas and Monitor Lab checked out beside this repository, run:
+
+```bash
+make integration
+```
+
+`make integration` checks both source revisions, runs the adapter across all 256 traces, and
+rebuilds the checked report files.

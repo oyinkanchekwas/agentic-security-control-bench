@@ -9,7 +9,7 @@ closest to the experiment in this repository. It is not a systematic review.
 | [Agent Security Bench](https://openreview.net/pdf?id=V4y0CpX4hK) | Attacks and defences across ten agent settings and over 400 tools | The present dataset uses small counterfactual trace sets with executable effect checks |
 | [ControlArena](https://control-arena.aisi.org.uk/monitors.html) | Step-level suspicion scoring and control protocols | This evaluator requires an event citation, field citations, and one discrete control |
 | [MonitoringBench](https://arxiv.org/abs/2605.09684) | Semi-automated red-teaming of coding-agent monitors on 2,644 attack trajectories | The present experiment tests evidence attribution under controlled trace edits |
-| [SLEIGHT-Bench](https://arxiv.org/abs/2605.16626) | Evasion attacks against coding-agent monitors | The seed cases are paired with permitted lexical decoys and low-signal unsafe traces |
+| [SLEIGHT-Bench](https://arxiv.org/abs/2605.16626) | Evasion attacks against coding-agent monitors | The cases are paired with permitted lexical decoys and low-signal unsafe traces |
 | [StepShield](https://github.com/glo26/stepshield) | A public 2026 repository centred on intervention timing | Timing is recorded here, but causal field evidence and control choice form the main task |
 | [OSGuard](https://arxiv.org/abs/2606.15034) | Contextual action safety and state-based invariants for computer-use agents | This work applies contrastive state checks to coding-agent traces and evaluates cited evidence fields |
 | [PASTABench](https://openreview.net/pdf?id=2IqSjWFIxd) | Proactive monitoring with temporal and categorical ground truth | The present metric asks whether the selected evidence changes under the labelled counterfactual |

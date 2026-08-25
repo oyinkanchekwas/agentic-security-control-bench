@@ -5,4 +5,4 @@ from control_bench.evaluation import evaluate_monitor
 from control_bench.monitors import MONITORS
 
 __all__ = ["MONITORS", "evaluate_monitor", "load_contrast_sets", "validate_contrast_sets"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

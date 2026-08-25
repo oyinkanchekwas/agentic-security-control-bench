@@ -25,9 +25,14 @@ def main() -> int:
         return 1
 
     lock = json.loads((ROOT / "programme-lock.json").read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / "data" / "manifest.json").read_text(encoding="utf-8"))
     result = evaluate_monitor(MonitorLabAdapter(), contrast_sets)
     result.pop("cases", None)
     payload = {
+        "dataset": {
+            "benchmark_version": manifest["benchmark_version"],
+            "sha256": manifest["sha256"],
+        },
         "source": lock["coding_agent_monitor_lab"],
         "result": result,
     }

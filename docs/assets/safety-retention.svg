@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="520" viewBox="0 0 860 520" role="img" aria-labelledby="title desc">
+<title id="title">Unsafe-action prevention against permitted-task retention</title>
+<desc id="desc">Scatter plot of five monitors evaluated on 256 synthetic traces.</desc>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="105" y="34" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">Safety and permitted-task retention</text>
+<text x="105" y="56" font-family="Arial, sans-serif" font-size="13" fill="#4b5563">v0.2 dataset, 256 synthetic traces</text>
+<line x1="105.0" y1="70" x2="105.0" y2="430" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="105" y1="430.0" x2="805" y2="430.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="105.0" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.0</text>
+<text x="87" y="434.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.0</text>
+<line x1="245.0" y1="70" x2="245.0" y2="430" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="105" y1="358.0" x2="805" y2="358.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="245.0" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.2</text>
+<text x="87" y="362.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.2</text>
+<line x1="385.0" y1="70" x2="385.0" y2="430" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="105" y1="286.0" x2="805" y2="286.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="385.0" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.4</text>
+<text x="87" y="290.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.4</text>
+<line x1="525.0" y1="70" x2="525.0" y2="430" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="105" y1="214.0" x2="805" y2="214.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="525.0" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.6</text>
+<text x="87" y="218.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.6</text>
+<line x1="665.0" y1="70" x2="665.0" y2="430" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="105" y1="142.0" x2="805" y2="142.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="665.0" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.8</text>
+<text x="87" y="146.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">0.8</text>
+<line x1="805.0" y1="70" x2="805.0" y2="430" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="105" y1="70.0" x2="805" y2="70.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="805.0" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">1.0</text>
+<text x="87" y="74.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">1.0</text>
+<line x1="105" y1="430" x2="805" y2="430" stroke="#111827" stroke-width="1.5"/>
+<line x1="105" y1="70" x2="105" y2="430" stroke="#111827" stroke-width="1.5"/>
+<text x="455.0" y="488" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#111827">Permitted-task retention</text>
+<text x="24" y="250.0" text-anchor="middle" transform="rotate(-90 24 250.0)" font-family="Arial, sans-serif" font-size="14" fill="#111827">Unsafe-action prevention</text>
+<circle cx="805.0" cy="430.0" r="7" fill="#6b7280" stroke="#ffffff" stroke-width="2"/>
+<text x="725.0" y="416.0" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#6b7280">Allow all</text>
+<circle cx="105.0" cy="70.0" r="7" fill="#111827" stroke="#ffffff" stroke-width="2"/>
+<text x="117.0" y="94.0" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">Block all</text>
+<circle cx="214.3" cy="154.4" r="7" fill="#c2410c" stroke="#ffffff" stroke-width="2"/>
+<text x="226.3" y="142.4" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#c2410c">Keyword</text>
+<circle cx="805.0" cy="70.0" r="7" fill="#047857" stroke="#ffffff" stroke-width="2"/>
+<text x="659.0" y="94.0" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#047857">Policy-field oracle</text>
+<circle cx="684.7" cy="362.5" r="7" fill="#1d4ed8" stroke="#ffffff" stroke-width="2"/>
+<text x="592.7" y="346.5" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#1d4ed8">Monitor Lab</text>
+</svg>

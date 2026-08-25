@@ -67,6 +67,23 @@ class TraceEvent:
 
 
 @dataclass(frozen=True)
+class ObservedEvent:
+    event_id: str
+    sequence: int
+    actor: str
+    kind: str
+    content: str
+    attributes: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class MonitorTrace:
+    trace_id: str
+    task: str
+    events: tuple[ObservedEvent, ...]
+
+
+@dataclass(frozen=True)
 class Recovery:
     accepted_controls: tuple[ControlAction, ...]
     events: tuple[TraceEvent, ...]
@@ -85,6 +102,7 @@ class GoldDecision:
     control: ControlAction
     first_actionable_event: str | None
     evidence: tuple[EvidenceTarget, ...]
+    severity: str
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "GoldDecision":
@@ -93,6 +111,7 @@ class GoldDecision:
             control=ControlAction(payload["control"]),
             first_actionable_event=payload.get("first_actionable_event"),
             evidence=tuple(EvidenceTarget.from_dict(item) for item in payload.get("evidence", [])),
+            severity=str(payload.get("severity", "none")),
         )
 
 
@@ -118,6 +137,23 @@ class TraceVariant:
             recovery=Recovery.from_dict(payload.get("recovery", {})),
         )
 
+    def for_monitor(self) -> MonitorTrace:
+        return MonitorTrace(
+            trace_id=self.trace_id,
+            task=self.task,
+            events=tuple(
+                ObservedEvent(
+                    event_id=event.event_id,
+                    sequence=event.sequence,
+                    actor=event.actor,
+                    kind=event.kind,
+                    content=event.content,
+                    attributes=dict(event.attributes),
+                )
+                for event in self.events
+            ),
+        )
+
 
 @dataclass(frozen=True)
 class ContrastComparison:
@@ -138,20 +174,28 @@ class ContrastComparison:
 
 @dataclass(frozen=True)
 class ContrastSet:
+    benchmark_version: str
     set_id: str
     title: str
     failure_mode: str
     policy_rule: str
+    split: str
+    scenario_id: str
+    template_id: str
     variants: tuple[TraceVariant, ...]
     comparisons: tuple[ContrastComparison, ...]
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "ContrastSet":
         return cls(
+            benchmark_version=str(payload["benchmark_version"]),
             set_id=str(payload["set_id"]),
             title=str(payload["title"]),
             failure_mode=str(payload["failure_mode"]),
             policy_rule=str(payload["policy_rule"]),
+            split=str(payload["split"]),
+            scenario_id=str(payload["scenario_id"]),
+            template_id=str(payload["template_id"]),
             variants=tuple(TraceVariant.from_dict(item) for item in payload["variants"]),
             comparisons=tuple(ContrastComparison.from_dict(item) for item in payload["comparisons"]),
         )
@@ -184,5 +228,5 @@ class MonitorDecision:
 class Monitor(Protocol):
     name: str
 
-    def inspect(self, trace: TraceVariant) -> MonitorDecision:
+    def inspect(self, trace: MonitorTrace) -> MonitorDecision:
         ...

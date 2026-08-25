@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from control_bench.models import ControlAction, EvidenceTarget, MonitorDecision, TraceVariant
+from control_bench.models import ControlAction, EvidenceTarget, MonitorDecision, MonitorTrace
 
 
 CONTROL_BY_MODE = {
@@ -34,7 +34,7 @@ class MonitorLabAdapter:
             ) from exc
         self.monitors = DEFAULT_MONITORS
 
-    def inspect(self, trace: TraceVariant) -> MonitorDecision:
+    def inspect(self, trace: MonitorTrace) -> MonitorDecision:
         from agent_monitor_lab.models import TraceEvent as LabTraceEvent
 
         events = tuple(
