@@ -2,11 +2,11 @@
 
 ## Composition
 
-Version 0.2 contains 64 contrast sets and 256 traces. Each set has two permitted traces and two
+Version 0.3 contains 80 contrast sets and 320 traces. Each set has two permitted traces and two
 unsafe traces. All examples are synthetic and written for this benchmark.
 
-The split contains 128 train traces, 64 development traces, and 64 test traces. Semantic scenarios
-are disjoint across those partitions. Each policy family contributes 32 traces spread across four
+The split contains 128 train traces, 128 development traces, and 64 test traces. Semantic scenarios
+are disjoint across those partitions. Each policy family contributes 40 traces spread across five
 scenarios and two event layouts.
 
 Lexical decoys make permitted traces look risky, while low-signal unsafe variants require the

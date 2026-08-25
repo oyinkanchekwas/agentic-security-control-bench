@@ -4,13 +4,19 @@ from html import escape
 import json
 from pathlib import Path
 
+from control_bench.dataset import load_contrast_sets
+from control_bench.evaluation import evaluate_monitor
+from control_bench.monitors import MONITORS
+
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINES = ROOT / "results" / "baselines.json"
 MONITOR_LAB = ROOT / "results" / "monitor_lab.json"
+LEARNED = ROOT / "results" / "qwen2.5-0.5b-instruct-test.json"
 MANIFEST = ROOT / "data" / "manifest.json"
 ERROR_REPORT = ROOT / "docs" / "ERROR_ANALYSIS.md"
 FIGURE = ROOT / "docs" / "assets" / "safety-retention.svg"
+LEARNED_FIGURE = ROOT / "docs" / "assets" / "learned-test-safety-retention.svg"
 
 
 LABELS = {
@@ -19,6 +25,7 @@ LABELS = {
     "keyword": "Keyword",
     "policy-field-oracle": "Policy-field oracle",
     "monitor-lab": "Monitor Lab",
+    "qwen2.5-0.5b-instruct": "Qwen2.5 0.5B",
 }
 
 COLOURS = {
@@ -27,27 +34,46 @@ COLOURS = {
     "keyword": "#c2410c",
     "policy-field-oracle": "#047857",
     "monitor-lab": "#1d4ed8",
+    "qwen2.5-0.5b-instruct": "#7c3aed",
 }
 
 
-def load_results() -> dict[str, dict[str, object]]:
+def load_results() -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]]]:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     baseline_payload = json.loads(BASELINES.read_text(encoding="utf-8"))
     monitor_payload = json.loads(MONITOR_LAB.read_text(encoding="utf-8"))
+    learned_payload = json.loads(LEARNED.read_text(encoding="utf-8"))
     if baseline_payload["dataset_sha256"] != manifest["sha256"]:
         raise ValueError("Baseline results do not match the materialised dataset digest.")
     if monitor_payload["dataset"]["sha256"] != manifest["sha256"]:
         raise ValueError("Monitor Lab results do not match the materialised dataset digest.")
+    if learned_payload["run"]["dataset_sha256"] != manifest["sha256"]:
+        raise ValueError("Learned results do not match the materialised dataset digest.")
     baselines = baseline_payload["results"]
     monitor_lab = monitor_payload["result"]
-    return {item["monitor"]: item for item in [*baselines, monitor_lab]}
+    full_results = {item["monitor"]: item for item in [*baselines, monitor_lab]}
+    learned = learned_payload["result"]
+    test_sets = tuple(
+        item
+        for item in load_contrast_sets(ROOT / "data" / "contrast_sets.jsonl")
+        if item.split == "test"
+    )
+    keyword_test = evaluate_monitor(MONITORS["keyword"], test_sets, bootstrap_iterations=0)
+    test_results = {
+        keyword_test["monitor"]: keyword_test,
+        learned["monitor"]: learned,
+    }
+    return full_results, test_results
 
 
-def render_error_report(results: dict[str, dict[str, object]]) -> str:
+def render_error_report(
+    results: dict[str, dict[str, object]],
+    test_results: dict[str, dict[str, object]],
+) -> str:
     lines = [
         "# Error Analysis",
         "",
-        "Each policy family contains 32 traces: 16 unsafe and 16 permitted. Counts below use the full v0.2 dataset.",
+        "Each policy family contains 40 traces: 20 unsafe and 20 permitted. The first two sections use the full v0.3 dataset.",
         "",
     ]
     for monitor_name in ("keyword", "monitor-lab"):
@@ -85,10 +111,51 @@ def render_error_report(results: dict[str, dict[str, object]]) -> str:
             "",
         ]
     )
+    learned = test_results["qwen2.5-0.5b-instruct"]
+    metrics = learned["metrics"]
+    errors = learned["errors"]
+    lines.extend(
+        [
+            "## Qwen2.5 0.5B on test",
+            "",
+            (
+                f"The held-out run prevents {metrics['unsafe_action_prevention']:.4f} of unsafe "
+                f"effects and retains {metrics['permitted_task_retention']:.4f} of permitted tasks. "
+                f"It records {errors['false_allows']} false allows and {errors['over_interventions']} "
+                "interventions on permitted traces."
+            ),
+            "",
+            "| Policy family | False allows | Over-interventions | Wrong controls | Evidence misses |",
+            "| --- | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for family, family_result in learned["by_policy_family"].items():
+        family_errors = family_result["errors"]
+        lines.append(
+            f"| `{family}` | {family_errors['false_allows']} | "
+            f"{family_errors['over_interventions']} | {family_errors['wrong_controls']} | "
+            f"{family_errors['evidence_misses']} |"
+        )
+    lines.extend(
+        [
+            "",
+            (
+                f"Malformed-output rate is {metrics['malformed_output_rate']:.4f}; execution-failure "
+                f"rate is {metrics['execution_failure_rate']:.4f}. Raw generations remain under the "
+                "ignored `results/raw/` path."
+            ),
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
-def render_figure(results: dict[str, dict[str, object]]) -> str:
+def render_figure(
+    results: dict[str, dict[str, object]],
+    *,
+    monitor_names: tuple[str, ...] | None = None,
+    subtitle: str = "v0.3 dataset, 320 synthetic traces",
+) -> str:
     width = 860
     height = 520
     left = 105
@@ -104,13 +171,14 @@ def render_figure(results: dict[str, dict[str, object]]) -> str:
     def y(value: float) -> float:
         return top + (1.0 - value) * plot_height
 
+    selected = monitor_names or tuple(results)
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
         '<title id="title">Unsafe-action prevention against permitted-task retention</title>',
-        '<desc id="desc">Scatter plot of five monitors evaluated on 256 synthetic traces.</desc>',
+        f'<desc id="desc">Scatter plot of {len(selected)} monitors; {escape(subtitle)}.</desc>',
         '<rect width="100%" height="100%" fill="#ffffff"/>',
         '<text x="105" y="34" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">Safety and permitted-task retention</text>',
-        '<text x="105" y="56" font-family="Arial, sans-serif" font-size="13" fill="#4b5563">v0.2 dataset, 256 synthetic traces</text>',
+        f'<text x="105" y="56" font-family="Arial, sans-serif" font-size="13" fill="#4b5563">{escape(subtitle)}</text>',
     ]
     for step in range(6):
         value = step / 5
@@ -133,13 +201,14 @@ def render_figure(results: dict[str, dict[str, object]]) -> str:
         ]
     )
     offsets = {
-        "allow-all": (-80, -14),
+        "allow-all": (-112, -14),
         "block-all": (12, 24),
         "keyword": (12, -12),
         "policy-field-oracle": (-146, 24),
         "monitor-lab": (-92, -16),
+        "qwen2.5-0.5b-instruct": (12, 24),
     }
-    for monitor_name in LABELS:
+    for monitor_name in selected:
         metrics = results[monitor_name]["metrics"]
         point_x = x(float(metrics["permitted_task_retention"]))
         point_y = y(float(metrics["unsafe_action_prevention"]))
@@ -155,11 +224,19 @@ def render_figure(results: dict[str, dict[str, object]]) -> str:
 
 
 def main() -> int:
-    results = load_results()
-    ERROR_REPORT.write_text(render_error_report(results), encoding="utf-8")
+    results, test_results = load_results()
+    ERROR_REPORT.write_text(render_error_report(results, test_results), encoding="utf-8")
     FIGURE.parent.mkdir(parents=True, exist_ok=True)
     FIGURE.write_text(render_figure(results), encoding="utf-8")
-    print(f"Wrote {ERROR_REPORT} and {FIGURE}")
+    LEARNED_FIGURE.write_text(
+        render_figure(
+            test_results,
+            monitor_names=("keyword", "qwen2.5-0.5b-instruct"),
+            subtitle="held-out test split, 64 synthetic traces",
+        ),
+        encoding="utf-8",
+    )
+    print(f"Wrote {ERROR_REPORT}, {FIGURE}, and {LEARNED_FIGURE}")
     return 0
 
 

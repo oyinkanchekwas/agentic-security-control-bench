@@ -2,17 +2,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from math import isfinite
 from typing import Any, Protocol
 
 
 class ControlAction(str, Enum):
     ALLOW = "allow"
     WARN = "warn"
-    REVISE = "revise"
-    REDACT = "redact"
-    REQUEST_APPROVAL = "request_approval"
-    SANDBOX = "sandbox"
+    REQUIRE_APPROVAL = "require_approval"
     BLOCK = "block"
+
+
+class MonitorStatus(str, Enum):
+    SUCCESS = "success"
+    ABSTENTION = "abstention"
+    MALFORMED_OUTPUT = "malformed_output"
+    EXECUTION_FAILURE = "execution_failure"
 
 
 @dataclass(frozen=True)
@@ -75,12 +80,32 @@ class ObservedEvent:
     content: str
     attributes: dict[str, Any] = field(default_factory=dict)
 
+    def to_provider_dict(self) -> dict[str, Any]:
+        return {
+            "event_id": self.event_id,
+            "sequence": self.sequence,
+            "actor": self.actor,
+            "kind": self.kind,
+            "content": self.content,
+            "attributes": dict(self.attributes),
+        }
+
 
 @dataclass(frozen=True)
 class MonitorTrace:
     trace_id: str
     task: str
     events: tuple[ObservedEvent, ...]
+
+    def to_provider_dict(self) -> dict[str, Any]:
+        return {
+            "trace_id": self.trace_id,
+            "task": self.task,
+            "events": [event.to_provider_dict() for event in self.events],
+        }
+
+    def event(self, event_id: str) -> ObservedEvent | None:
+        return next((event for event in self.events if event.event_id == event_id), None)
 
 
 @dataclass(frozen=True)
@@ -202,26 +227,185 @@ class ContrastSet:
 
 
 @dataclass(frozen=True)
+class MonitorResponse:
+    control: ControlAction
+    first_actionable_event: str | None
+    evidence_fields: tuple[str, ...]
+    confidence: float
+    reason: str
+
+    def __post_init__(self) -> None:
+        if not isfinite(self.confidence) or not 0.0 <= self.confidence <= 1.0:
+            raise ValueError("confidence must be a finite number between 0 and 1")
+        if not self.reason.strip():
+            raise ValueError("reason must contain text")
+        if len(self.reason) > 500:
+            raise ValueError("reason must not exceed 500 characters")
+        if len(set(self.evidence_fields)) != len(self.evidence_fields):
+            raise ValueError("evidence_fields must not contain duplicates")
+        if self.first_actionable_event is None and self.evidence_fields:
+            raise ValueError("evidence_fields require first_actionable_event")
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "MonitorResponse":
+        required = {
+            "control",
+            "first_actionable_event",
+            "evidence_fields",
+            "confidence",
+            "reason",
+        }
+        if set(payload) != required:
+            missing = sorted(required - set(payload))
+            extra = sorted(set(payload) - required)
+            raise ValueError(f"response fields differ: missing={missing}, extra={extra}")
+        evidence_fields = payload["evidence_fields"]
+        if not isinstance(evidence_fields, list) or not all(
+            isinstance(item, str) for item in evidence_fields
+        ):
+            raise ValueError("evidence_fields must be an array of strings")
+        event_id = payload["first_actionable_event"]
+        if event_id is not None and not isinstance(event_id, str):
+            raise ValueError("first_actionable_event must be a string or null")
+        confidence = payload["confidence"]
+        if isinstance(confidence, bool) or not isinstance(confidence, (int, float)):
+            raise ValueError("confidence must be numeric")
+        reason = payload["reason"]
+        if not isinstance(reason, str):
+            raise ValueError("reason must be a string")
+        return cls(
+            control=ControlAction(payload["control"]),
+            first_actionable_event=event_id,
+            evidence_fields=tuple(evidence_fields),
+            confidence=float(confidence),
+            reason=reason,
+        )
+
+    def validate_for_trace(self, trace: MonitorTrace) -> None:
+        if self.first_actionable_event is None:
+            if self.control is not ControlAction.ALLOW:
+                raise ValueError("an intervention control requires first_actionable_event")
+            return
+        if self.control is ControlAction.ALLOW:
+            raise ValueError("allow requires a null first_actionable_event")
+        event = trace.event(self.first_actionable_event)
+        if event is None:
+            raise ValueError("first_actionable_event is not present in the monitor trace")
+        available = _event_field_paths(event)
+        missing = sorted(set(self.evidence_fields) - available)
+        if missing:
+            raise ValueError(f"evidence fields are unavailable: {missing}")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "control": self.control.value,
+            "first_actionable_event": self.first_actionable_event,
+            "evidence_fields": list(self.evidence_fields),
+            "confidence": self.confidence,
+            "reason": self.reason,
+        }
+
+
+@dataclass(frozen=True)
 class MonitorDecision:
     trace_id: str
-    control: ControlAction
-    risk_score: float
-    event_id: str | None
-    evidence: tuple[EvidenceTarget, ...] = ()
-    reason: str = ""
+    response: MonitorResponse
+    status: MonitorStatus = MonitorStatus.SUCCESS
+    failure_detail: str | None = None
     latency_ms: float = 0.0
-    token_cost: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+    @property
+    def control(self) -> ControlAction:
+        return self.response.control
+
+    @property
+    def event_id(self) -> str | None:
+        return self.response.first_actionable_event
+
+    @property
+    def evidence(self) -> tuple[EvidenceTarget, ...]:
+        if self.event_id is None:
+            return ()
+        return tuple(EvidenceTarget(self.event_id, field) for field in self.response.evidence_fields)
+
+    @classmethod
+    def successful(
+        cls,
+        *,
+        trace_id: str,
+        control: ControlAction,
+        confidence: float,
+        first_actionable_event: str | None,
+        evidence_fields: tuple[str, ...] = (),
+        reason: str,
+        latency_ms: float = 0.0,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
+        estimated_cost_usd: float = 0.0,
+    ) -> "MonitorDecision":
+        return cls(
+            trace_id=trace_id,
+            response=MonitorResponse(
+                control=control,
+                first_actionable_event=first_actionable_event,
+                evidence_fields=evidence_fields,
+                confidence=confidence,
+                reason=reason,
+            ),
+            latency_ms=latency_ms,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            estimated_cost_usd=estimated_cost_usd,
+        )
+
+    @classmethod
+    def fail_safe(
+        cls,
+        *,
+        trace: MonitorTrace,
+        status: MonitorStatus,
+        detail: str,
+        latency_ms: float = 0.0,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
+        estimated_cost_usd: float = 0.0,
+    ) -> "MonitorDecision":
+        event = next(
+            (item for item in trace.events if item.kind in {"action", "response"}),
+            trace.events[-1],
+        )
+        return cls(
+            trace_id=trace.trace_id,
+            response=MonitorResponse(
+                control=ControlAction.BLOCK,
+                first_actionable_event=event.event_id,
+                evidence_fields=(),
+                confidence=1.0,
+                reason="Monitor result unavailable; the action is blocked for review.",
+            ),
+            status=status,
+            failure_detail=detail[:500],
+            latency_ms=latency_ms,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            estimated_cost_usd=estimated_cost_usd,
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "trace_id": self.trace_id,
-            "control": self.control.value,
-            "risk_score": self.risk_score,
-            "event_id": self.event_id,
-            "evidence": [item.to_dict() for item in self.evidence],
-            "reason": self.reason,
-            "latency_ms": self.latency_ms,
-            "token_cost": self.token_cost,
+            "response": self.response.to_dict(),
+            "execution": {
+                "status": self.status.value,
+                "failure_detail": self.failure_detail,
+                "latency_ms": self.latency_ms,
+                "input_tokens": self.input_tokens,
+                "output_tokens": self.output_tokens,
+                "estimated_cost_usd": self.estimated_cost_usd,
+            },
         }
 
 
@@ -230,3 +414,9 @@ class Monitor(Protocol):
 
     def inspect(self, trace: MonitorTrace) -> MonitorDecision:
         ...
+
+
+def _event_field_paths(event: ObservedEvent) -> set[str]:
+    paths = {"event_id", "sequence", "actor", "kind", "content"}
+    paths.update(f"attributes.{key}" for key in event.attributes)
+    return paths

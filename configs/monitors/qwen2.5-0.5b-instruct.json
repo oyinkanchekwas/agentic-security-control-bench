@@ -1,0 +1,18 @@
+{
+  "bootstrap_seed": 20260825,
+  "monitor_kind": "structured_judge",
+  "name": "qwen2.5-0.5b-instruct",
+  "prompt_path": "prompts/monitor-json-v1.txt",
+  "prompt_version": "monitor-json-v1",
+  "provider": {
+    "device": "auto",
+    "kind": "transformers",
+    "local_files_only": true,
+    "max_new_tokens": 192,
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+  },
+  "seed": 20260825,
+  "split": "test",
+  "temperature": 0.0
+}

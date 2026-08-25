@@ -20,11 +20,12 @@ class BoundaryProbe:
     def inspect(self, trace: MonitorTrace) -> MonitorDecision:
         self.trace_fields.update(trace.__dataclass_fields__)
         self.event_fields.update(trace.events[-1].__dataclass_fields__)
-        return MonitorDecision(
+        return MonitorDecision.successful(
             trace_id=trace.trace_id,
             control=ControlAction.ALLOW,
-            risk_score=0.0,
-            event_id=None,
+            confidence=0.0,
+            first_actionable_event=None,
+            reason="Boundary inspection completed.",
         )
 
 

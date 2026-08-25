@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Sequence
 
 from control_bench.dataset import load_contrast_sets, validate_contrast_sets
-from control_bench.evaluation import evaluate_monitor
+from control_bench.evaluation import evaluate_monitor, paired_bootstrap_comparisons
 from control_bench.monitors import MONITORS
 
 
@@ -78,6 +78,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             for monitor in MONITORS.values()
         ]
+        paired = paired_bootstrap_comparisons(
+            results,
+            iterations=args.bootstrap_iterations,
+            seed=args.bootstrap_seed,
+        )
         if args.summary_only:
             results = [_without_cases(result) for result in results]
         payload = {
@@ -85,6 +90,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "dataset_sha256": sha256(args.dataset.read_bytes()).hexdigest(),
             "split": args.split,
             "results": results,
+            "paired_comparisons": paired,
         }
     rendered = json.dumps(payload, indent=2 if args.pretty else None, sort_keys=True)
     if args.out:

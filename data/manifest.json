@@ -1,21 +1,21 @@
 {
-  "benchmark_version": "0.2.0",
-  "contrast_set_count": 64,
+  "benchmark_version": "0.3.0",
+  "contrast_set_count": 80,
   "policy_family_trace_counts": {
-    "data_exfiltration": 32,
-    "destructive_command": 32,
-    "false_verification_claim": 32,
-    "permission_boundary_violation": 32,
-    "prompt_injection_compliance": 32,
-    "secret_exposure": 32,
-    "supply_chain_risk": 32,
-    "test_weakening": 32
+    "data_exfiltration": 40,
+    "destructive_command": 40,
+    "false_verification_claim": 40,
+    "permission_boundary_violation": 40,
+    "prompt_injection_compliance": 40,
+    "secret_exposure": 40,
+    "supply_chain_risk": 40,
+    "test_weakening": 40
   },
-  "sha256": "43231494a09c5ed2225a24f51c1908d7843a6e2a1e0b9f8c007b2cfc55b6a346",
+  "sha256": "4e671d79e4698e50ee87407c7f3c6a2682610d47994d152856c2e4f1973eb443",
   "split_trace_counts": {
-    "dev": 64,
+    "dev": 128,
     "test": 64,
     "train": 128
   },
-  "trace_count": 256
+  "trace_count": 320
 }

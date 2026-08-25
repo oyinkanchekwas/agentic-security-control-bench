@@ -1,0 +1,19 @@
+{
+  "bootstrap_seed": 20260825,
+  "monitor_kind": "structured_judge",
+  "name": "frontier-judge",
+  "prompt_path": "prompts/monitor-json-v1.txt",
+  "prompt_version": "monitor-json-v1",
+  "provider": {
+    "api_key_environment": "CONTROL_BENCH_API_KEY",
+    "base_url": "https://provider.example/v1",
+    "input_cost_per_million": 0.0,
+    "kind": "chat_completions",
+    "model_id": "set-model-id-before-run",
+    "output_cost_per_million": 0.0,
+    "timeout_seconds": 60.0
+  },
+  "seed": 20260825,
+  "split": "test",
+  "temperature": 0.0
+}

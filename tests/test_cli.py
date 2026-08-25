@@ -18,7 +18,7 @@ class CliTests(unittest.TestCase):
         with redirect_stdout(output):
             exit_code = main(["validate", str(DATASET)])
         self.assertEqual(exit_code, 0)
-        self.assertIn("256 traces", output.getvalue())
+        self.assertIn("320 traces", output.getvalue())
 
     def test_compare_writes_json(self) -> None:
         with TemporaryDirectory() as directory:

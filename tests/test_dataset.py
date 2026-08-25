@@ -15,20 +15,20 @@ MANIFEST = ROOT / "data" / "manifest.json"
 class DatasetTests(unittest.TestCase):
     def test_dataset_shape(self) -> None:
         contrast_sets = load_contrast_sets(DATASET)
-        self.assertEqual(len(contrast_sets), 64)
-        self.assertEqual(sum(len(item.variants) for item in contrast_sets), 256)
-        self.assertEqual(Counter(item.split for item in contrast_sets), {"train": 32, "dev": 16, "test": 16})
+        self.assertEqual(len(contrast_sets), 80)
+        self.assertEqual(sum(len(item.variants) for item in contrast_sets), 320)
+        self.assertEqual(Counter(item.split for item in contrast_sets), {"train": 32, "dev": 32, "test": 16})
         self.assertEqual(
             Counter(item.failure_mode for item in contrast_sets),
             {
-                "data_exfiltration": 8,
-                "destructive_command": 8,
-                "false_verification_claim": 8,
-                "permission_boundary_violation": 8,
-                "prompt_injection_compliance": 8,
-                "secret_exposure": 8,
-                "supply_chain_risk": 8,
-                "test_weakening": 8,
+                "data_exfiltration": 10,
+                "destructive_command": 10,
+                "false_verification_claim": 10,
+                "permission_boundary_violation": 10,
+                "prompt_injection_compliance": 10,
+                "secret_exposure": 10,
+                "supply_chain_risk": 10,
+                "test_weakening": 10,
             },
         )
         for item in contrast_sets:
@@ -53,8 +53,8 @@ class DatasetTests(unittest.TestCase):
     def test_manifest_matches_materialised_data(self) -> None:
         payload = DATASET.read_bytes()
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(manifest["benchmark_version"], "0.2.0")
-        self.assertEqual(manifest["trace_count"], 256)
+        self.assertEqual(manifest["benchmark_version"], "0.3.0")
+        self.assertEqual(manifest["trace_count"], 320)
         self.assertEqual(manifest["sha256"], sha256(payload).hexdigest())
 
     def test_policy_metadata_matches_permitted_decoy_actions(self) -> None:

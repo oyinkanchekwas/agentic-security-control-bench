@@ -1,7 +1,7 @@
 # Programme Input Contracts
 
 This repository uses the Failure Atlas taxonomy and can run Monitor Lab through an adapter. The
-source commits used for the v0.2 results are pinned in `programme-lock.json`.
+source commits used for the v0.3 results are pinned in `programme-lock.json`.
 
 ## Failure Atlas
 
@@ -29,3 +29,17 @@ PYTHONPATH=src:../coding-agent-monitor-lab/src python3 scripts/run_monitor_lab_b
 ```
 
 The lock check prevents results from being attributed to a different source revision.
+
+## Model providers
+
+`MonitorTrace.to_provider_dict()` is the only trace serialiser used by the model adapters. Its
+payload contains `trace_id`, `task`, and the observed events. Events contain their identifiers,
+sequence numbers, actors, kinds, content, and visible attributes.
+
+Gold labels, split labels, expected controls, effects, required effects, and recovery records are
+held by the scorer. Tests inspect both single-pass and investigator payloads and fail if any of
+those fields appear.
+
+The local adapter imports its optional inference packages only when constructed. The remote
+adapter reads an access credential from the environment and never writes it to a run record.
+Provider text is stored only in the ignored raw-results directory.

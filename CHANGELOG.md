@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 - 2026-08-25
+
+- Replaced the seven-control decision object with a validated five-field response using four controls.
+- Added fail-safe handling and separate counts for abstention, malformed output, and execution failure.
+- Added optional local and remote model providers, a two-call investigator, and a deterministic-model ensemble.
+- Added provider-payload isolation tests and ignored raw-response storage.
+- Added input and output token counts, estimated cost, evidence F1, and replayed task completion.
+- Added paired contrast-set bootstrap comparisons for monitors evaluated on the same traces.
+- Added frozen run configurations and digest-bound learned-result verification.
+- Evaluated Qwen2.5-0.5B-Instruct on the 64-trace held-out test split.
+
 ## 0.2.0 - 2026-08-25
 
 - Expanded the dataset from 32 to 256 synthetic traces.

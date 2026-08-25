@@ -25,6 +25,12 @@ after the control decision.
 
 ## Exclusions
 
-Version 0.2 does not model operating-system isolation escapes, network exploitation,
+Version 0.3 does not model operating-system isolation escapes, network exploitation,
 cryptographic failures, compromised monitor infrastructure, or collusion between the monitored
-agent and the monitor. Those cases require executable sandboxes and a different risk review.
+agent and the monitor. Those cases require executable isolation and a separate risk review.
+
+## Provider boundary
+
+Model providers receive synthetic monitor-visible traces only. Access credentials remain in the
+process environment. Raw payloads may still contain generated provider text, so they are written to
+an ignored local directory and are excluded from checked summaries.
