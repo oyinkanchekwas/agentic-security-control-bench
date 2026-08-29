@@ -1,0 +1,22 @@
+{
+  "version": "0.4.0",
+  "release_date": "2026-08-29",
+  "ordinary_dataset_version": "0.3.0",
+  "adversarial_suite_version": "0.4.0",
+  "files": {
+    "configs/monitors/qwen2.5-0.5b-instruct.json": "10621b24085703307ceac7fd95da959ef4d536639119c0ad25374be3b1a7cd5f",
+    "data/adversarial/contrast_sets.jsonl": "598f5550802646c50964e6cc8cbd31f132222f796cfaed21cada07bad93a3014",
+    "data/adversarial/manifest.json": "c63b9db0e7fcdcd367a07ee110b9a601dddf00546205ded792ac796e2f979b9e",
+    "data/contrast_sets.jsonl": "4e671d79e4698e50ee87407c7f3c6a2682610d47994d152856c2e4f1973eb443",
+    "data/manifest.json": "8f8606c56bb05cb065ff46b38ab5625608c2fd63f9bb380db0e4cd340234ee06",
+    "prompts/investigator-v1.txt": "3984e8a625d6bef6220d94daa99d7b7826bd935fe8df37fe736bbbe76ef85973",
+    "prompts/monitor-json-v1.txt": "b80ba1474dde795bb386e49a71d067a90b79079e40f58353288d1d98f134de4a",
+    "report/technical_report.md": "0c9a3a16fc6c38cf6bb3b4c6da79736a2fb835011102ae8f9a9a95101da68846",
+    "results/adversarial-baselines.json": "616954a0dcdbddb484b3d60feda2bfbfab51dfc959dbbc811f09a622a364f4f9",
+    "results/adversarial-monitor-lab.json": "24d3c8ecffab86456c9ab9994ead8b1f7627d29219f6508ee5e9e67bf6a7e1ee",
+    "results/baselines.json": "e4f73ff139707959d7c530c6f5ce1133e788f4e43451a689a8079922b932ed53",
+    "results/monitor_lab.json": "2ffc40fd4b63fa7f69d3b54acb325e4d926c083fc2d3abdb8f1bbaf03358c854",
+    "results/qwen2.5-0.5b-instruct-adversarial.json": "9af9978c33d253a5234a4a66da640c4056a14513c632c430a743c1b20669cc14",
+    "results/qwen2.5-0.5b-instruct-test.json": "3b768d20bebbb8ba542a014e34b967dbcdcf30fd32bb02b2a5db176a6cbc98a3"
+  }
+}

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 - 2026-08-25
+## 0.4.0 - 2026-08-29
 
 - Added a separate adversarial holdout with 40 contrast sets and 160 inert synthetic traces.
 - Balanced five perturbation classes across all eight policy families.
@@ -10,6 +10,8 @@
 - Added family-level and perturbation-level bootstrap intervals plus paired monitor differences.
 - Evaluated deterministic baselines, Monitor Lab, and Qwen2.5-0.5B-Instruct on the adversarial set.
 - Locked the v0.3 data, prompts, configuration, and result digests.
+- Corrected ensemble event selection when its component controls disagree.
+- Added public citation and release metadata.
 
 ## 0.3.0 - 2026-08-25
 

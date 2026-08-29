@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software or dataset, please cite this release."
+title: "Agentic Security Control Bench"
+type: software
+authors:
+  - family-names: "Onwuchekwa"
+    given-names: "Oyinkansola"
+repository-code: "https://github.com/oyinkanchekwas/agentic-security-control-bench"
+url: "https://github.com/oyinkanchekwas/agentic-security-control-bench"
+license: MIT
+version: 0.4.0
+date-released: 2026-08-29
+keywords:
+  - coding agents
+  - monitor evaluation
+  - agent security
+  - adversarial evaluation
+abstract: >-
+  A contrastive benchmark for testing whether coding-agent monitors base control decisions on
+  policy-relevant trace evidence. Version 0.4.0 contains 320 ordinary synthetic traces and a
+  separate 160-trace adversarial holdout.

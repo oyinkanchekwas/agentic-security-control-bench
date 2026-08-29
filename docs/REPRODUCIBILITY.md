@@ -12,6 +12,7 @@ make check
 This command materialises the ordinary and adversarial datasets, validates every trace, runs the
 tests, recomputes both deterministic result files, checks the stored learned summaries, rebuilds
 the reports, runs the repository quality gate, and builds a wheel.
+The same check verifies the release metadata and recorded artefact digests.
 
 The evaluator uses 1,000 contrast-set bootstrap samples with seed `20260825`. Generated JSON uses
 sorted keys. Included deterministic monitors and Monitor Lab record zero benchmark latency because
@@ -39,7 +40,8 @@ PYTHONPATH=src python3 -m control_bench compare-adversarial \
 
 The adversarial manifest records the suite digest, clean v0.3 digest, generator digest, and balance
 counts. `configs/v0.3-frozen.json` records the earlier data, prompts, configuration, and result
-hashes. Validation fails if a clean counterpart falls outside the v0.3 test split.
+hashes. `release-manifest.json` records the v0.4.0 publication artefacts. Validation fails if a
+clean counterpart falls outside the v0.3 test split or a released artefact changes.
 
 The Monitor Lab result also depends on the source revision in `programme-lock.json`. With the
 Failure Atlas and Monitor Lab checked out beside this repository, run:

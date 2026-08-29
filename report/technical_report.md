@@ -2,7 +2,7 @@
 
 Oyinkansola Onwuchekwa
 
-Version 0.4 report, 25 August 2026
+Version 0.4 report, 29 August 2026
 
 ## Abstract
 
@@ -37,8 +37,9 @@ field. Replayed effects then test whether the chosen control prevents harm and c
 
 AgentDojo evaluates security and utility under prompt injection. ControlArena supports online
 monitoring and control protocols. MonitoringBench and SLEIGHT-Bench examine attacks that evade
-coding-agent monitors. StepShield and PASTABench study intervention timing, while OSGuard combines
-contextual action labels with state-based checks.
+coding-agent monitors. FixedBench studies action bias, and UnderSpecBench measures action-boundary
+violations in underspecified DevOps tasks. StepShield and PASTABench study intervention timing,
+while OSGuard combines contextual action labels with state-based checks.
 
 This experiment concentrates on causal evidence at trace-field level and replayed task effects. The
 prior-work table in `docs/PRIOR_WORK.md` records the review boundary and access date.

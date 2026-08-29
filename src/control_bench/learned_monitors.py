@@ -129,7 +129,14 @@ class DeterministicModelEnsemble:
             control = learned.control
         else:
             control = _combine_controls(fixed.control, learned.control)
-            selected = max((fixed, learned), key=lambda item: item.response.confidence)
+            candidates = (fixed, learned)
+            if control is not ControlAction.ALLOW:
+                candidates = tuple(
+                    item
+                    for item in candidates
+                    if item.control is not ControlAction.ALLOW and item.event_id is not None
+                )
+            selected = max(candidates, key=lambda item: item.response.confidence)
         event_id = selected.event_id
         if control is ControlAction.ALLOW:
             event_id = None

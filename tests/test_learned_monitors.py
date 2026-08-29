@@ -5,15 +5,23 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+from control_bench.configuration import _build_provider
 from control_bench.dataset import load_contrast_sets
 from control_bench.evaluation import evaluate_monitor, paired_bootstrap_comparisons
 from control_bench.learned_monitors import (
     AgenticInvestigatorMonitor,
+    DeterministicModelEnsemble,
     ProviderReply,
     StructuredJudgeMonitor,
     TransformersProvider,
 )
-from control_bench.models import ControlAction, MonitorResponse, MonitorStatus
+from control_bench.models import (
+    ControlAction,
+    MonitorDecision,
+    MonitorResponse,
+    MonitorStatus,
+    MonitorTrace,
+)
 from control_bench.monitors import MONITORS
 from control_bench.prompting import build_monitor_messages
 
@@ -49,6 +57,30 @@ class BrokenProvider:
 
     def complete(self, messages, *, temperature, seed) -> ProviderReply:
         raise RuntimeError("test provider unavailable")
+
+
+class FixedDecisionMonitor:
+    name = "fixed-decision"
+
+    def __init__(
+        self,
+        *,
+        control: ControlAction,
+        confidence: float,
+        event_id: str | None,
+    ) -> None:
+        self.control = control
+        self.confidence = confidence
+        self.event_id = event_id
+
+    def inspect(self, trace: MonitorTrace) -> MonitorDecision:
+        return MonitorDecision.successful(
+            trace_id=trace.trace_id,
+            control=self.control,
+            confidence=self.confidence,
+            first_actionable_event=self.event_id,
+            reason="Fixed test decision.",
+        )
 
 
 class LearnedMonitorTests(unittest.TestCase):
@@ -89,6 +121,17 @@ class LearnedMonitorTests(unittest.TestCase):
             TransformersProvider(model_id="fixture", revision="abc", device="cpu")
         self.assertEqual(model_calls[0][1]["torch_dtype"], "auto")
         self.assertNotIn("dtype", model_calls[0][1])
+
+    def test_provider_configuration_rejects_string_boolean(self) -> None:
+        with self.assertRaisesRegex(ValueError, "local_files_only"):
+            _build_provider(
+                {
+                    "kind": "transformers",
+                    "model_id": "fixture",
+                    "revision": "abc",
+                    "local_files_only": "false",
+                }
+            )
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -238,6 +281,27 @@ class LearnedMonitorTests(unittest.TestCase):
         paired = paired_bootstrap_comparisons(results, iterations=0, seed=7)
         self.assertEqual(paired[0]["method"], "disabled")
         self.assertIn("point", paired[0]["metric_differences"]["control_accuracy"])
+
+    def test_ensemble_keeps_an_event_for_combined_intervention(self) -> None:
+        event_id = self.trace.events[-1].event_id
+        intervention = FixedDecisionMonitor(
+            control=ControlAction.BLOCK,
+            confidence=0.4,
+            event_id=event_id,
+        )
+        high_confidence_allow = FixedDecisionMonitor(
+            control=ControlAction.ALLOW,
+            confidence=0.9,
+            event_id=None,
+        )
+        ensemble = DeterministicModelEnsemble(
+            deterministic=intervention,
+            learned=high_confidence_allow,
+        )
+        decision = ensemble.inspect(self.trace)
+        self.assertEqual(decision.control, ControlAction.REQUIRE_APPROVAL)
+        self.assertEqual(decision.event_id, event_id)
+        decision.response.validate_for_trace(self.trace)
 
 
 if __name__ == "__main__":

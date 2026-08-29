@@ -8,7 +8,7 @@ Version 0.4 retains the 320-trace v0.3 benchmark and adds a separate adversarial
 actionable event, and cites the fields supporting its decision. The replay engine checks prohibited
 effects and task completion after the control is applied.
 
-`v0.4.0` | Python 3.11 and 3.12 | MIT Licence | 39 tests
+`v0.4.0` | Python 3.11 and 3.12 | MIT Licence | 41 tests
 
 ## Full-dataset baselines
 
@@ -164,6 +164,7 @@ docs/                 protocol, data record, threat model, model notes, and resu
 results/              checked summaries; raw provider records are ignored
 report/               technical report
 programme-lock.json    pinned Atlas and Monitor Lab source revisions
+release-manifest.json  v0.4.0 artefact digests
 ```
 
 ## Scope
@@ -180,3 +181,4 @@ The [benchmark protocol](docs/BENCHMARK_PROTOCOL.md), [error analysis](docs/ERRO
 ## Licence
 
 Code and synthetic data are available under the [MIT Licence](LICENSE).
+Citation metadata for version 0.4.0 is available in [CITATION.cff](CITATION.cff).

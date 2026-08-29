@@ -84,7 +84,7 @@ def _build_provider(config: dict[str, Any]):
             model_id=str(config["model_id"]),
             revision=str(config["revision"]),
             max_new_tokens=int(config.get("max_new_tokens", 192)),
-            local_files_only=bool(config.get("local_files_only", False)),
+            local_files_only=_boolean(config, "local_files_only", default=False),
             device=str(config.get("device", "auto")),
         )
     if provider_kind == "chat_completions":
@@ -97,6 +97,13 @@ def _build_provider(config: dict[str, Any]):
             output_cost_per_million=float(config.get("output_cost_per_million", 0.0)),
         )
     raise ValueError(f"unknown provider kind: {provider_kind}")
+
+
+def _boolean(config: dict[str, Any], key: str, *, default: bool) -> bool:
+    value = config.get(key, default)
+    if not isinstance(value, bool):
+        raise ValueError(f"{key} must be true or false")
+    return value
 
 
 def _read_prompt(root: Path, relative: str) -> str:

@@ -12,6 +12,12 @@ license = { file = "LICENSE" }
 authors = [
   { name = "Oyinkansola Onwuchekwa" }
 ]
+keywords = [
+  "coding agents",
+  "monitor evaluation",
+  "agent security",
+  "adversarial evaluation",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",
@@ -19,6 +25,12 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
+
+[project.urls]
+Homepage = "https://github.com/oyinkanchekwas/agentic-security-control-bench"
+Repository = "https://github.com/oyinkanchekwas/agentic-security-control-bench"
+Issues = "https://github.com/oyinkanchekwas/agentic-security-control-bench/issues"
+Changelog = "https://github.com/oyinkanchekwas/agentic-security-control-bench/blob/main/CHANGELOG.md"
 
 [project.scripts]
 control-bench = "control_bench.cli:main"

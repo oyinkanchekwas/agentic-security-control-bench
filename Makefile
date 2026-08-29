@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: data adversarial-data validate validate-adversarial test baselines adversarial-baselines verify-results verify-learned verify-adversarial reports quality package integration learned-qwen learned-adversarial-qwen check
+.PHONY: data adversarial-data validate validate-adversarial test baselines adversarial-baselines verify-results verify-learned verify-adversarial verify-release reports quality package integration learned-qwen learned-adversarial-qwen check
 
 data:
 	PYTHONPATH=src $(PYTHON) scripts/materialise_dataset.py
@@ -32,6 +32,9 @@ verify-learned:
 verify-adversarial:
 	PYTHONPATH=src $(PYTHON) scripts/verify_adversarial_results.py
 
+verify-release:
+	PYTHONPATH=src $(PYTHON) scripts/verify_release.py
+
 reports:
 	PYTHONPATH=src $(PYTHON) scripts/build_reports.py
 
@@ -54,4 +57,4 @@ learned-qwen:
 learned-adversarial-qwen:
 	PYTHONPATH=src $(PYTHON) scripts/run_adversarial_learned.py --config configs/monitors/qwen2.5-0.5b-instruct.json --out results/qwen2.5-0.5b-instruct-adversarial.json --raw-out results/raw/qwen2.5-0.5b-instruct-adversarial.jsonl
 
-check: data adversarial-data validate validate-adversarial test baselines adversarial-baselines verify-results verify-learned verify-adversarial reports quality package
+check: data adversarial-data validate validate-adversarial test baselines adversarial-baselines verify-results verify-learned verify-adversarial reports verify-release quality package
