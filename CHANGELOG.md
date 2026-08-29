@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 - 2026-08-29
+
+- Updated the pinned build backend to `setuptools==83.0.0` after GitHub reported two advisories against the earlier pin.
+- Added the Zenodo DOI to the README, citation file, and package metadata.
+
 ## 0.4.0 - 2026-08-29
 
 - Added a separate adversarial holdout with 40 contrast sets and 160 inert synthetic traces.

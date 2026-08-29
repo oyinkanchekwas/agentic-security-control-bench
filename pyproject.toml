@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools==71.1.0"]
+requires = ["setuptools==83.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic-security-control-bench"
-version = "0.4.0"
+version = "0.4.1"
 description = "Contrastive evaluation for evidence-grounded coding-agent controls"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -29,7 +29,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/oyinkanchekwas/agentic-security-control-bench"
 Repository = "https://github.com/oyinkanchekwas/agentic-security-control-bench"
-Archive = "https://doi.org/10.5281/zenodo.22162754"
+Archive = "https://doi.org/10.5281/zenodo.22162753"
 Issues = "https://github.com/oyinkanchekwas/agentic-security-control-bench/issues"
 Changelog = "https://github.com/oyinkanchekwas/agentic-security-control-bench/blob/main/CHANGELOG.md"
 

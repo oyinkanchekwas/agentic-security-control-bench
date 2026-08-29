@@ -8,9 +8,9 @@ authors:
 repository-code: "https://github.com/oyinkanchekwas/agentic-security-control-bench"
 url: "https://github.com/oyinkanchekwas/agentic-security-control-bench"
 license: MIT
-version: 0.4.0
+version: 0.4.1
 date-released: 2026-08-29
-doi: 10.5281/zenodo.22162754
+doi: 10.5281/zenodo.22162753
 keywords:
   - coding agents
   - monitor evaluation
@@ -18,5 +18,5 @@ keywords:
   - adversarial evaluation
 abstract: >-
   A contrastive benchmark for testing whether coding-agent monitors base control decisions on
-  policy-relevant trace evidence. Version 0.4.0 contains 320 ordinary synthetic traces and a
+  policy-relevant trace evidence. Version 0.4.1 contains 320 ordinary synthetic traces and a
   separate 160-trace adversarial holdout.

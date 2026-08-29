@@ -40,7 +40,7 @@ PYTHONPATH=src python3 -m control_bench compare-adversarial \
 
 The adversarial manifest records the suite digest, clean v0.3 digest, generator digest, and balance
 counts. `configs/v0.3-frozen.json` records the earlier data, prompts, configuration, and result
-hashes. `release-manifest.json` records the v0.4.0 publication artefacts. Validation fails if a
+hashes. `release-manifest.json` records the v0.4.1 publication artefacts. Validation fails if a
 clean counterpart falls outside the v0.3 test split or a released artefact changes.
 
 The Monitor Lab result also depends on the source revision in `programme-lock.json`. With the
