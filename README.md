@@ -1,5 +1,7 @@
 # Agentic Security Control Bench
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22162754.svg)](https://doi.org/10.5281/zenodo.22162754)
+
 A contrastive benchmark for testing whether coding-agent monitors base control decisions on
 policy-relevant trace evidence.
 

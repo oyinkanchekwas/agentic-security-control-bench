@@ -10,6 +10,7 @@ url: "https://github.com/oyinkanchekwas/agentic-security-control-bench"
 license: MIT
 version: 0.4.0
 date-released: 2026-08-29
+doi: 10.5281/zenodo.22162754
 keywords:
   - coding agents
   - monitor evaluation

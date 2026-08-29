@@ -29,6 +29,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/oyinkanchekwas/agentic-security-control-bench"
 Repository = "https://github.com/oyinkanchekwas/agentic-security-control-bench"
+Archive = "https://doi.org/10.5281/zenodo.22162754"
 Issues = "https://github.com/oyinkanchekwas/agentic-security-control-bench/issues"
 Changelog = "https://github.com/oyinkanchekwas/agentic-security-control-bench/blob/main/CHANGELOG.md"
 
